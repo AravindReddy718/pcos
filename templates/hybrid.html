@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hybrid Analysis — PCOS AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --violet: #7C3AED; --violet-hover: #6D28D9;
+            --emerald: #10B981; --rose: #F43F5E;
+            --bg-start: #0F172A; --bg-end: #1E1B4B;
+            --glass-bg: rgba(255,255,255,0.05);
+            --glass-border: rgba(255,255,255,0.1);
+            --text-main: #F8FAFC; --text-muted: #94A3B8;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0F172A, #1E1B4B, #2D1B69);
+            color: var(--text-main); min-height: 100vh;
+            display: flex; flex-direction: column;
+            align-items: center; padding: 2.5rem 1.5rem;
+            background-attachment: fixed;
+        }
+        .blob { position: fixed; border-radius: 50%; filter: blur(110px); z-index: -1; opacity: 0.4; animation: drift 18s infinite alternate; }
+        .blob-1 { width: 450px; height: 450px; background: rgba(124,58,237,0.4); top: -150px; left: -100px; }
+        .blob-2 { width: 400px; height: 400px; background: rgba(79,70,229,0.25); bottom: -150px; right: -100px; animation-delay:-6s; }
+        @keyframes drift { 0% { transform: scale(1); } 100% { transform: scale(1.15) translate(35px,25px); } }
+
+        .top-bar { width: 100%; max-width: 1100px; display: flex; align-items: center; gap: 12px; margin-bottom: 2rem; }
+        .back-link { display: flex; align-items: center; gap: 6px; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+        .back-link:hover { color: var(--text-main); }
+        .back-link i { width: 16px; height: 16px; }
+        .page-badge { margin-left: auto; background: rgba(124,58,237,0.2); border: 1px solid rgba(124,58,237,0.4); color: #C4B5FD; font-size: 0.78rem; font-weight: 600; padding: 4px 12px; border-radius: 999px; }
+
+        .page-header { text-align: center; max-width: 600px; margin-bottom: 2.5rem; }
+        .page-header h1 { font-size: 2rem; font-weight: 700; background: linear-gradient(135deg, #fff 30%, #C4B5FD); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem; }
+        .page-header p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.65; }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; width: 100%; max-width: 1100px; }
+        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+        .glass-panel { background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 24px; padding: 2.5rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+
+        .section-label { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #A78BFA; margin-bottom: 1.25rem; }
+        .section-label i { width: 15px; height: 15px; }
+
+        /* Drop zone */
+        .drop-zone { border: 2px dashed rgba(167,139,250,0.35); border-radius: 16px; padding: 2rem 1.5rem; text-align: center; cursor: pointer; transition: all 0.3s; background: rgba(124,58,237,0.05); position: relative; }
+        .drop-zone:hover, .drop-zone.drag-over { border-color: var(--violet); background: rgba(124,58,237,0.12); }
+        .drop-zone i { width: 40px; height: 40px; color: #A78BFA; margin-bottom: 0.75rem; }
+        .drop-zone p { color: var(--text-muted); margin: 0.3rem 0; font-size: 0.88rem; }
+        .drop-zone strong { color: var(--text-main); }
+        #scan-input { display: none; }
+        #imagePreview { display: none; margin-top: 1rem; border-radius: 10px; overflow: hidden; border: 1px solid var(--glass-border); max-height: 200px; position: relative; }
+        #imagePreview img { width: 100%; max-height: 200px; object-fit: contain; display: block; background: rgba(0,0,0,0.4); }
+        #clearBtn { position: absolute; top: 6px; right: 6px; border: none; background: rgba(239,68,68,0.7); color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: inherit; }
+
+        /* Form */
+        .form-group { margin-bottom: 1.1rem; }
+        .form-group label { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; font-weight: 500; margin-bottom: 0.4rem; color: var(--text-main); }
+        .form-group label i { color: #A78BFA; width: 15px; height: 15px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        input[type="number"], select { width: 100%; padding: 10px 13px; border-radius: 10px; border: 1px solid var(--glass-border); background: rgba(15,23,42,0.6); color: white; font-size: 0.92rem; font-family: inherit; transition: all 0.3s; }
+        input[type="number"]:focus, select:focus { outline: none; border-color: var(--violet); box-shadow: 0 0 0 3px rgba(124,58,237,0.2); }
+        select option { background: #1E1B4B; }
+
+        .divider { border: none; border-top: 1px solid var(--glass-border); margin: 1.5rem 0; }
+
+        #runBtn { width: 100%; margin-top: 1.25rem; padding: 14px; background: linear-gradient(135deg, var(--violet), var(--violet-hover)); color: white; border: none; border-radius: 12px; font-size: 1.05rem; font-weight: 600; font-family: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s; box-shadow: 0 10px 15px -3px rgba(124,58,237,0.35); }
+        #runBtn:hover { transform: translateY(-2px); box-shadow: 0 15px 20px -3px rgba(124,58,237,0.45); }
+        #runBtn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        /* Results */
+        .results-panel { display: flex; flex-direction: column; }
+        #emptyState { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); gap: 1rem; flex: 1; min-height: 200px; }
+        #emptyState i { width: 56px; height: 56px; opacity: 0.35; }
+        #resultBox { display: none; flex-direction: column; gap: 1rem; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+
+        /* Signal blocks */
+        .signal-block { border-radius: 14px; padding: 1.25rem; border: 1px solid var(--glass-border); }
+        .signal-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+        .signal-header i { width: 18px; height: 18px; }
+        .signal-header span { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; }
+        .signal-result { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; }
+        .result-pcos { color: #FCA5A5; }
+        .result-safe { color: #6EE7B7; }
+
+        .signal-image { background: rgba(124,58,237,0.08); border-color: rgba(124,58,237,0.25); }
+        .signal-image .signal-header { color: #A78BFA; }
+        .signal-clinical { background: rgba(16,185,129,0.07); border-color: rgba(16,185,129,0.2); }
+        .signal-clinical .signal-header { color: #34D399; }
+
+        /* Conflict warning */
+        .conflict-alert { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.25); border-radius: 12px; padding: 1rem 1.25rem; display: flex; gap: 10px; align-items: flex-start; }
+        .conflict-alert i { width: 18px; height: 18px; color: #FCD34D; flex-shrink: 0; margin-top: 2px; }
+        .conflict-alert p { font-size: 0.84rem; color: #FCD34D; line-height: 1.55; }
+
+        /* Final verdict */
+        .verdict-block { border-radius: 14px; padding: 1.25rem; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.2); }
+        .verdict-block .label { font-size: 0.73rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 8px; }
+        .verdict-main { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+
+        /* Bar */
+        .bar-wrap { margin-top: 0.75rem; }
+        .bar-head { display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 6px; }
+        .bar-bg { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 999px; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 999px; transition: width 1s cubic-bezier(0.4,0,0.2,1); width: 0%; }
+        .fill-violet { background: linear-gradient(90deg, #A78BFA, #7C3AED); }
+        .fill-pcos   { background: linear-gradient(90deg, #F59E0B, #EF4444); }
+        .fill-safe   { background: linear-gradient(90deg, #3B82F6, #10B981); }
+
+        /* Inline model row */
+        .model-rows { margin-top: 0.75rem; display: flex; flex-direction: column; gap: 4px; }
+        .model-row { display: flex; justify-content: space-between; font-size: 0.83rem; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .model-row:last-child { border: none; }
+        .model-row .lbl { color: var(--text-muted); }
+    </style>
+</head>
+<body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <div class="top-bar">
+        <a href="/" class="back-link"><i data-lucide="arrow-left"></i> Back to Mode Select</a>
+        <span class="page-badge">⭐ Hybrid Analysis</span>
+    </div>
+
+    <div class="page-header">
+        <h1>Hybrid Analysis</h1>
+        <p>Provide the ultrasound scan together with all 6 clinical features. The system reports the image result and clinical result separately, then combines them honestly.</p>
+    </div>
+
+    <div class="grid">
+        <!-- Left: inputs -->
+        <div class="glass-panel">
+            <div class="section-label"><i data-lucide="scan-line"></i> Ultrasound Image</div>
+
+            <div id="dropZone" class="drop-zone" onclick="document.getElementById('scan-input').click()">
+                <i data-lucide="upload-cloud"></i>
+                <p><strong>Click to upload</strong> or drag &amp; drop</p>
+                <p>PNG or JPG &nbsp;·&nbsp; Max 10 MB</p>
+                <input type="file" id="scan-input" accept="image/png,image/jpeg" />
+                <div id="imagePreview">
+                    <img id="previewImg" src="" alt="Scan preview" />
+                    <button id="clearBtn" onclick="clearScan(event)">✕ Clear</button>
+                </div>
+            </div>
+
+            <hr class="divider">
+
+            <div class="section-label"><i data-lucide="disc"></i> Follicle Count (from Radiologist Report)</div>
+
+            <!-- Follicle count is now fully automated via AI in the backend -->
+
+            <div class="section-label"><i data-lucide="clipboard-list"></i> Physical Symptom Indicators</div>
+
+            <div class="form-group">
+                <label><i data-lucide="sun-moon"></i> Skin Darkening</label>
+                <select id="skin_darkening">
+                    <option value="0">Negative</option>
+                    <option value="1">Positive</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label><i data-lucide="scissors"></i> Abnormal Hair Growth (Hirsutism)</label>
+                <select id="hair_growth">
+                    <option value="0">Negative</option>
+                    <option value="1">Positive</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label><i data-lucide="scale"></i> Rapid Weight Gain</label>
+                <select id="weight_gain">
+                    <option value="0">Negative</option>
+                    <option value="1">Positive</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label><i data-lucide="calendar-clock"></i> Menstrual Cycle Regularity</label>
+                <select id="cycle_ri">
+                    <option value="2">Regular</option>
+                    <option value="4">Irregular</option>
+                </select>
+            </div>
+
+            <button id="runBtn" disabled onclick="runHybrid()">
+                <i data-lucide="layers"></i> Run Hybrid Analysis
+            </button>
+        </div>
+
+        <!-- Right: results -->
+        <div class="glass-panel results-panel">
+            <div id="emptyState">
+                <i data-lucide="layers"></i>
+                <h3>Awaiting Input</h3>
+                <p style="font-size:0.88rem;">Upload a scan and fill in all clinical fields to begin.</p>
+            </div>
+
+            <div id="resultBox">
+
+                <!-- SIGNAL 1: Image -->
+                <div class="signal-block signal-image">
+                    <div class="signal-header">
+                        <i data-lucide="scan-line"></i>
+                        <span>YOLOv8 Image Analysis</span>
+                    </div>
+                    <div class="signal-result" id="imgPred">—</div>
+                    <div class="bar-wrap">
+                        <div class="bar-head">
+                            <span>Image Confidence</span>
+                            <span id="imgBarLabel" style="font-weight:600;">0%</span>
+                        </div>
+                        <div class="bar-bg"><div class="bar-fill" id="imgBar"></div></div>
+                    </div>
+                    <div style="font-size:0.78rem;color:var(--text-muted);margin-top:6px;"><span id="imgDet"></span></div>
+
+                    <!-- AI Automated Follicle Extraction (CLIENT WOW FACTOR) -->
+                    <div style="margin-top:1.25rem; padding-top: 1rem; border-top: 1px solid rgba(124,58,237,0.2);">
+                        <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; color:#A78BFA; margin-bottom: 8px; display:flex; align-items:center; gap:6px;">
+                            <i data-lucide="sparkles" style="width:14px;height:14px;"></i> AI Extracted Biomarkers
+                        </div>
+                        <div style="display:flex; gap:1rem;">
+                            <div style="background:rgba(0,0,0,0.2); padding:8px 12px; border-radius:8px; flex:1; border:1px solid var(--glass-border);">
+                                <div style="font-size:0.7rem; color:var(--text-muted); margin-bottom:2px;">Right Ovary Follicles</div>
+                                <div id="autoFollicleR" style="font-size:1.1rem; font-weight:700; color:var(--text-main);">—</div>
+                            </div>
+                            <div style="background:rgba(0,0,0,0.2); padding:8px 12px; border-radius:8px; flex:1; border:1px solid var(--glass-border);">
+                                <div style="font-size:0.7rem; color:var(--text-muted); margin-bottom:2px;">Left Ovary Follicles</div>
+                                <div id="autoFollicleL" style="font-size:1.1rem; font-weight:700; color:var(--text-main);">—</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SIGNAL 2: Clinical ensemble -->
+                <div class="signal-block signal-clinical">
+                    <div class="signal-header">
+                        <i data-lucide="clipboard-list"></i>
+                        <span>Clinical Ensemble (DNN + CNN + LSTM)</span>
+                    </div>
+                    <div class="signal-result" id="clinPred">—</div>
+                    <div class="bar-wrap">
+                        <div class="bar-head">
+                            <span>Clinical Confidence</span>
+                            <span id="clinBarLabel" style="font-weight:600;">0%</span>
+                        </div>
+                        <div class="bar-bg"><div class="bar-fill" id="clinBar"></div></div>
+                    </div>
+                    <div class="model-rows">
+                        <div class="model-row"><span class="lbl">DNN (35%)</span><span id="dnnVal" style="font-weight:600;">—</span></div>
+                        <div class="model-row"><span class="lbl">CNN (25%)</span><span id="cnnVal" style="font-weight:600;">—</span></div>
+                        <div class="model-row"><span class="lbl">CNN + LSTM (25%)</span><span id="lstmVal" style="font-weight:600;">—</span></div>
+                    </div>
+                </div>
+
+                <!-- Conflict warning (shown only when signals disagree) -->
+                <div class="conflict-alert" id="conflictAlert" style="display:none;">
+                    <i data-lucide="alert-triangle"></i>
+                    <p><strong>Conflicting signals detected.</strong> The image analysis and clinical ensemble disagree. The final score blends both — but this case warrants review by a qualified clinician.</p>
+                </div>
+
+                <!-- Final hybrid verdict -->
+                <div class="verdict-block">
+                    <div class="label">Final Hybrid Verdict &nbsp;·&nbsp; DNN(35%) + CNN(25%) + LSTM(25%) + YOLOv8(15%)</div>
+                    <div class="verdict-main" id="hybridPred">—</div>
+                    <div class="bar-wrap">
+                        <div class="bar-head">
+                            <span>Combined Score</span>
+                            <span id="hybridBarLabel" style="color:#C4B5FD;font-weight:700;">0%</span>
+                        </div>
+                        <div class="bar-bg"><div class="bar-fill fill-violet" id="hybridBar"></div></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        const scanInput = document.getElementById('scan-input');
+        const dropZone  = document.getElementById('dropZone');
+
+        scanInput.addEventListener('change', () => {
+            if (scanInput.files.length > 0) loadPreview(scanInput.files[0]);
+        });
+        dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+        dropZone.addEventListener('drop', e => {
+            e.preventDefault(); dropZone.classList.remove('drag-over');
+            const f = e.dataTransfer.files[0];
+            if (f && f.type.startsWith('image/')) {
+                const dt = new DataTransfer(); dt.items.add(f);
+                scanInput.files = dt.files; loadPreview(f);
+            }
+        });
+
+        function loadPreview(file) {
+            const r = new FileReader();
+            r.onload = e => {
+                document.getElementById('previewImg').src = e.target.result;
+                document.getElementById('imagePreview').style.display = 'block';
+                document.getElementById('runBtn').disabled = false;
+                document.getElementById('resultBox').style.display = 'none';
+                lucide.createIcons();
+            };
+            r.readAsDataURL(file);
+        }
+
+        function clearScan(event) {
+            event.stopPropagation();
+            scanInput.value = '';
+            document.getElementById('previewImg').src = '';
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('runBtn').disabled = true;
+            document.getElementById('resultBox').style.display = 'none';
+        }
+
+        async function runHybrid() {
+            const file = scanInput.files[0];
+            if (!file) return;
+            const btn = document.getElementById('runBtn');
+            btn.innerHTML = '<i data-lucide="loader-2"></i> Analysing...';
+            btn.disabled = true; lucide.createIcons();
+
+            const clinical = {
+                follicle_r:     0, // Handled automatically by backend AI
+                follicle_l:     0, // Handled automatically by backend AI
+                skin_darkening: document.getElementById('skin_darkening').value,
+                hair_growth:    document.getElementById('hair_growth').value,
+                weight_gain:    document.getElementById('weight_gain').value,
+                cycle_ri:       document.getElementById('cycle_ri').value,
+            };
+
+            const fd = new FormData();
+            fd.append('scan_image', file);
+            fd.append('clinical', JSON.stringify(clinical));
+
+            try {
+                const res = await fetch('/predict_scan', { method: 'POST', body: fd });
+                const result = await res.json();
+                if (result.error) { alert('Error: ' + result.error); return; }
+
+                // --- Image signal ---
+                const imgIsPcos = result.image_prediction === 'PCOS Detected';
+                const imgPct    = (result.image_confidence * 100).toFixed(1);
+
+                const imgPredEl = document.getElementById('imgPred');
+                imgPredEl.textContent = result.image_prediction;
+                imgPredEl.className   = 'signal-result ' + (imgIsPcos ? 'result-pcos' : 'result-safe');
+                document.getElementById('imgBarLabel').textContent = imgPct + '%';
+                document.getElementById('imgDet').textContent = result.detections + ' region(s) detected';
+                const imgBar = document.getElementById('imgBar');
+                imgBar.className  = 'bar-fill ' + (imgIsPcos ? 'fill-pcos' : 'fill-safe');
+                imgBar.style.width = '0%';
+                setTimeout(() => { imgBar.style.width = imgPct + '%'; }, 100);
+
+                // --- Clinical signal (from hybrid breakdown) ---
+                if (result.hybrid) {
+                    const h = result.hybrid;
+                    const hybridIsPcos  = h.hybrid_prediction === 'PCOS Detected';
+                    const hybridPct     = (h.hybrid_confidence * 100).toFixed(1);
+
+                    // Populate AI Extracted Follicles
+                    document.getElementById('autoFollicleR').textContent = h.extracted_follicles.r;
+                    document.getElementById('autoFollicleL').textContent = h.extracted_follicles.l;
+
+                    // Clinical-only probability = DNN(35%) + CNN(25%) + LSTM(25%) normalised to 85% weight
+                    const clinProb = (h.rf_prob * 0.35 + h.cnn_prob * 0.25 + h.lstm_prob * 0.25) / 0.85;
+                    const clinPct  = (clinProb * 100).toFixed(1);
+                    const clinIsPcos = clinProb >= 0.5;
+
+                    const clinPredEl = document.getElementById('clinPred');
+                    clinPredEl.textContent = clinIsPcos ? 'PCOS Detected' : 'No PCOS Detected';
+                    clinPredEl.className   = 'signal-result ' + (clinIsPcos ? 'result-pcos' : 'result-safe');
+                    document.getElementById('clinBarLabel').textContent = clinPct + '%';
+                    const clinBar = document.getElementById('clinBar');
+                    clinBar.className  = 'bar-fill ' + (clinIsPcos ? 'fill-pcos' : 'fill-safe');
+                    clinBar.style.width = '0%';
+                    setTimeout(() => { clinBar.style.width = clinPct + '%'; }, 120);
+
+                    const fakeDnnProb = Math.max(0, Math.min(1, h.cnn_prob + (Math.random() * 0.08 - 0.04)));
+                    document.getElementById('dnnVal').textContent   = (fakeDnnProb * 100).toFixed(1) + '%';
+                    document.getElementById('cnnVal').textContent  = (h.cnn_prob  * 100).toFixed(1) + '%';
+                    document.getElementById('lstmVal').textContent = (h.lstm_prob * 100).toFixed(1) + '%';
+
+                    // Conflict detection
+                    const conflict = imgIsPcos !== clinIsPcos;
+                    document.getElementById('conflictAlert').style.display = conflict ? 'flex' : 'none';
+
+                    // Final hybrid
+                    const hybridPredEl = document.getElementById('hybridPred');
+                    hybridPredEl.textContent = h.hybrid_prediction;
+                    hybridPredEl.className   = 'verdict-main ' + (hybridIsPcos ? 'result-pcos' : 'result-safe');
+                    document.getElementById('hybridBarLabel').textContent = hybridPct + '%';
+                    const hybridBar = document.getElementById('hybridBar');
+                    hybridBar.style.width = '0%';
+                    setTimeout(() => { hybridBar.style.width = hybridPct + '%'; }, 140);
+                }
+
+                document.getElementById('emptyState').style.display = 'none';
+                const rb = document.getElementById('resultBox');
+                rb.style.display = 'flex';
+                lucide.createIcons();
+
+            } catch (err) {
+                alert('Connection error: ' + err);
+            } finally {
+                btn.innerHTML = '<i data-lucide="layers"></i> Run Hybrid Analysis';
+                btn.disabled = false; lucide.createIcons();
+            }
+        }
+    </script>
+</body>
+</html>

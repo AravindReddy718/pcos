@@ -1,0 +1,21 @@
+# Core Web Framework
+Flask
+flask-cors
+
+# Data & Math
+numpy
+pandas
+joblib
+
+# Neural Networks & ML
+tensorflow>=2.0.0
+scikit-learn
+ultralytics
+
+# Image Processing & UI Dependencies
+opencv-python
+Pillow
+
+# OCR & Lab Report Extraction
+easyocr
+pdfplumber

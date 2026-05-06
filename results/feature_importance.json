@@ -1,0 +1,39 @@
+{
+    "top_features": [
+        "Follicle No. (R)",
+        "Follicle No. (L)",
+        "Cycle(R/I)"
+    ],
+    "full_ranking": [
+        {
+            "rank": 1,
+            "feature": "Follicle No. (R)",
+            "mean_abs_shap": 0.227817
+        },
+        {
+            "rank": 2,
+            "feature": "Follicle No. (L)",
+            "mean_abs_shap": 0.170207
+        },
+        {
+            "rank": 3,
+            "feature": "Cycle(R/I)",
+            "mean_abs_shap": 0.093161
+        },
+        {
+            "rank": 4,
+            "feature": "Weight gain(Y/N)",
+            "mean_abs_shap": 0.045255
+        },
+        {
+            "rank": 5,
+            "feature": "hair growth(Y/N)",
+            "mean_abs_shap": 0.03729
+        },
+        {
+            "rank": 6,
+            "feature": "Skin darkening (Y/N)",
+            "mean_abs_shap": 0.036335
+        }
+    ]
+}

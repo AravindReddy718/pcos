@@ -1,0 +1,53 @@
+{
+    "MLP": {
+        "accuracy": 0.9554,
+        "precision": 0.9434,
+        "recall": 0.9615,
+        "f1_score": 0.9524,
+        "roc_auc": 0.9965,
+        "confusion_matrix": [
+            [
+                57,
+                3
+            ],
+            [
+                2,
+                50
+            ]
+        ]
+    },
+    "1D CNN (Deep)": {
+        "accuracy": 0.9286,
+        "precision": 0.9074,
+        "recall": 0.9423,
+        "f1_score": 0.9245,
+        "roc_auc": 0.9862,
+        "confusion_matrix": [
+            [
+                55,
+                5
+            ],
+            [
+                3,
+                49
+            ]
+        ]
+    },
+    "Pure LSTM": {
+        "accuracy": 0.9464,
+        "precision": 0.9423,
+        "recall": 0.9423,
+        "f1_score": 0.9423,
+        "roc_auc": 0.9946,
+        "confusion_matrix": [
+            [
+                57,
+                3
+            ],
+            [
+                3,
+                49
+            ]
+        ]
+    }
+}

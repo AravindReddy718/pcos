@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PCOS Clinical AI — Diagnostic Platform</title>
+    <meta name="description" content="AI-powered PCOS diagnostic platform. Choose your analysis method: manual clinical data, ultrasound scan, or a hybrid approach.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --emerald: #10B981;
+            --violet: #7C3AED;
+            --rose: #F43F5E;
+            --bg-start: #0F172A;
+            --bg-end: #1E1B4B;
+            --glass-bg: rgba(255,255,255,0.04);
+            --glass-border: rgba(255,255,255,0.1);
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 1.5rem;
+            background-attachment: fixed;
+            overflow-x: hidden;
+        }
+
+        /* Ambient blobs */
+        .blob {
+            position: fixed; border-radius: 50%;
+            filter: blur(110px); z-index: -1; opacity: 0.45;
+            animation: drift 18s infinite alternate ease-in-out;
+        }
+        .blob-1 { width: 500px; height: 500px; background: rgba(79,70,229,0.45); top: -150px; left: -150px; }
+        .blob-2 { width: 450px; height: 450px; background: rgba(16,185,129,0.25); bottom: -180px; right: -120px; animation-delay: -6s; }
+        .blob-3 { width: 300px; height: 300px; background: rgba(124,58,237,0.3); top: 50%; left: 50%; transform: translate(-50%,-50%); animation-delay: -12s; }
+
+        @keyframes drift {
+            0%   { transform: scale(1) translate(0, 0); }
+            100% { transform: scale(1.15) translate(40px, 40px); }
+        }
+
+        /* Header */
+        .hero {
+            text-align: center;
+            margin-bottom: 3.5rem;
+            max-width: 680px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(79,70,229,0.2);
+            border: 1px solid rgba(79,70,229,0.4);
+            border-radius: 999px;
+            padding: 6px 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #A5B4FC;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.2rem, 5vw, 3.2rem);
+            font-weight: 800;
+            line-height: 1.15;
+            background: linear-gradient(135deg, #ffffff 30%, #A5B4FC 100%);
+            -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        /* Cards grid */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        @media (max-width: 900px) {
+            .cards { grid-template-columns: 1fr; max-width: 480px; }
+        }
+
+        .card {
+            position: relative;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2.5rem 2rem;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 24px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover { transform: translateY(-8px); }
+        .card:hover::before { opacity: 1; }
+
+        /* Card accent colours */
+        .card-manual { border-top: 3px solid var(--primary); }
+        .card-manual:hover { box-shadow: 0 30px 60px -10px rgba(79,70,229,0.35); border-color: var(--primary); }
+        .card-manual::before { background: linear-gradient(135deg, rgba(79,70,229,0.08), transparent); }
+
+        .card-hybrid { border-top: 3px solid var(--violet); }
+        .card-hybrid:hover { box-shadow: 0 30px 60px -10px rgba(124,58,237,0.35); border-color: var(--violet); }
+        .card-hybrid::before { background: linear-gradient(135deg, rgba(124,58,237,0.08), transparent); }
+        .card-hybrid .recommended-tag {
+            position: absolute;
+            top: 16px; right: 16px;
+            background: rgba(124,58,237,0.25);
+            border: 1px solid rgba(124,58,237,0.4);
+            color: #C4B5FD;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 4px 10px;
+            border-radius: 999px;
+        }
+
+        .card-scan { border-top: 3px solid var(--emerald); }
+        .card-scan:hover { box-shadow: 0 30px 60px -10px rgba(16,185,129,0.35); border-color: var(--emerald); }
+        .card-scan::before { background: linear-gradient(135deg, rgba(16,185,129,0.08), transparent); }
+
+        /* Icon */
+        .card-icon {
+            width: 56px; height: 56px;
+            border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .card-icon i { width: 28px; height: 28px; }
+
+        .icon-manual { background: rgba(79,70,229,0.2); }
+        .icon-manual i { color: #818CF8; }
+
+        .icon-hybrid { background: rgba(124,58,237,0.2); }
+        .icon-hybrid i { color: #A78BFA; }
+
+        .icon-scan { background: rgba(16,185,129,0.2); }
+        .icon-scan i { color: #34D399; }
+
+        /* Card text */
+        .card h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.65;
+            flex: 1;
+        }
+
+        /* Feature chips */
+        .card-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chip {
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            background: rgba(255,255,255,0.04);
+        }
+
+        /* CTA arrow */
+        .card-cta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        .card-cta i { width: 18px; height: 18px; transition: transform 0.3s ease; }
+        .card:hover .card-cta i { transform: translateX(6px); }
+
+        .cta-manual { color: #818CF8; }
+        .cta-hybrid { color: #A78BFA; }
+        .cta-scan   { color: #34D399; }
+
+        /* Footer note */
+        .disclaimer {
+            margin-top: 3rem;
+            text-align: center;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            max-width: 560px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <div class="hero">
+        <div class="hero-badge">
+            <i data-lucide="activity" style="width:14px;height:14px;"></i>
+            PCOS · AI Diagnostics
+        </div>
+        <h1>Choose Your Analysis Mode</h1>
+        <p>Select the diagnostic approach that best matches the available patient data. All modes use a validated AI ensemble trained on clinical data.</p>
+    </div>
+
+    <div class="cards">
+
+        <!-- Card 1: Manual Entry -->
+        <a href="/manual" class="card card-manual">
+            <div class="card-icon icon-manual">
+                <i data-lucide="clipboard-list"></i>
+            </div>
+            <h2>Clinical Data Entry</h2>
+            <p>Enter the patient's lab-measured clinical features manually or upload a PDF lab report. Uses the full Deep Learning ensemble for the highest baseline accuracy.</p>
+            <div class="card-chips">
+                <span class="chip">DNN</span>
+                <span class="chip">CNN</span>
+                <span class="chip">LSTM</span>
+                <span class="chip">6 Features</span>
+            </div>
+            <div class="card-cta cta-manual">
+                Begin Manual Entry <i data-lucide="arrow-right"></i>
+            </div>
+        </a>
+
+        <!-- Card 2: Hybrid (Recommended) -->
+        <a href="/hybrid" class="card card-hybrid">
+            <span class="recommended-tag">⭐ Recommended</span>
+            <div class="card-icon icon-hybrid">
+                <i data-lucide="layers"></i>
+            </div>
+            <h2>Hybrid Analysis</h2>
+            <p>Upload an ultrasound scan and enter the 4 physical symptom indicators. The system fuses YOLOv8 image analysis with the clinical ensemble for a complete picture.</p>
+            <div class="card-chips">
+                <span class="chip">YOLOv8</span>
+                <span class="chip">DNN</span>
+                <span class="chip">CNN</span>
+                <span class="chip">LSTM</span>
+            </div>
+            <div class="card-cta cta-hybrid">
+                Begin Hybrid Analysis <i data-lucide="arrow-right"></i>
+            </div>
+        </a>
+
+        <!-- Card 3: Scan Only -->
+        <a href="/scan" class="card card-scan">
+            <div class="card-icon icon-scan">
+                <i data-lucide="scan-line"></i>
+            </div>
+            <h2>Scan Analysis Only</h2>
+            <p>Upload a pelvic ultrasound image for instant AI-powered visual classification. No additional data required. Powered by YOLOv8 trained on annotated PCOS scans.</p>
+            <div class="card-chips">
+                <span class="chip">YOLOv8</span>
+                <span class="chip">Bounding Box Detection</span>
+                <span class="chip">Instant</span>
+            </div>
+            <div class="card-cta cta-scan">
+                Begin Scan Analysis <i data-lucide="arrow-right"></i>
+            </div>
+        </a>
+
+    </div>
+
+    <p class="disclaimer">⚠️ For research and clinical decision-support use only. This tool is not a certified medical device and is not intended to replace qualified medical diagnosis. Always consult a licensed physician.</p>
+
+    <script>lucide.createIcons();</script>
+</body>
+</html>

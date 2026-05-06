@@ -1,0 +1,33 @@
+{
+  "dataset": "Dataset/clean_data.csv",
+  "feature_count": 6,
+  "features": [
+    "Follicle No. (R)",
+    "Follicle No. (L)",
+    "Skin darkening (Y/N)",
+    "hair growth(Y/N)",
+    "Weight gain(Y/N)",
+    "Cycle(R/I)"
+  ],
+  "target": "PCOS (Y/N)",
+  "models": {
+    "KNN": {
+      "accuracy": 0.9375,
+      "parameters": {
+        "n_neighbors": 9,
+        "p": 1,
+        "metric": "minkowski"
+      },
+      "notes": "Reproduced from SMOTE on PCOS Notebook.ipynb. Reported 95.58% in notebook, 93.75% in reproduction."
+    },
+    "RandomForest": {
+      "accuracy": 0.9911,
+      "parameters": {
+        "random_state": 0
+      },
+      "notes": "Reproduced from SMOTE on PCOS Notebook.ipynb. Best performing model found. Likely the 'Optimized' model user referred to (approx 99.5%)."
+    }
+  },
+  "selected_baseline": "RandomForest",
+  "baseline_accuracy": 0.9911
+}

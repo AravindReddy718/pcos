@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 2
+names: ['no-pcos', 'pcos']
+
+roboflow:
+  workspace: vanessas
+  project: pcos2
+  version: 2
+  license: Public Domain
+  url: https://universe.roboflow.com/vanessas/pcos2/dataset/2

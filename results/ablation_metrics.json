@@ -1,0 +1,104 @@
+{
+    "RF (Retrained No SMOTE)": {
+        "accuracy": 0.8879,
+        "precision": 0.8286,
+        "recall": 0.8286,
+        "f1_score": 0.8286,
+        "roc_auc": 0.9504,
+        "confusion_matrix": [
+            [
+                66,
+                6
+            ],
+            [
+                6,
+                29
+            ]
+        ]
+    },
+    "RF (Retrained SMOTE)": {
+        "accuracy": 0.9911,
+        "precision": 0.9811,
+        "recall": 1.0,
+        "f1_score": 0.9905,
+        "roc_auc": 0.9968,
+        "confusion_matrix": [
+            [
+                59,
+                1
+            ],
+            [
+                0,
+                52
+            ]
+        ]
+    },
+    "CNN (Retrained No SMOTE)": {
+        "accuracy": 0.8879,
+        "precision": 0.8966,
+        "recall": 0.7429,
+        "f1_score": 0.8125,
+        "roc_auc": 0.9571,
+        "confusion_matrix": [
+            [
+                69,
+                3
+            ],
+            [
+                9,
+                26
+            ]
+        ]
+    },
+    "CNN (Retrained SMOTE)": {
+        "accuracy": 0.9196,
+        "precision": 0.9216,
+        "recall": 0.9038,
+        "f1_score": 0.9126,
+        "roc_auc": 0.9875,
+        "confusion_matrix": [
+            [
+                56,
+                4
+            ],
+            [
+                5,
+                47
+            ]
+        ]
+    },
+    "Ensemble (Retrained No SMOTE)": {
+        "accuracy": 0.9065,
+        "precision": 0.9032,
+        "recall": 0.8,
+        "f1_score": 0.8485,
+        "roc_auc": 0.9651,
+        "confusion_matrix": [
+            [
+                69,
+                3
+            ],
+            [
+                7,
+                28
+            ]
+        ]
+    },
+    "Ensemble (Retrained SMOTE)": {
+        "accuracy": 0.9643,
+        "precision": 0.9444,
+        "recall": 0.9808,
+        "f1_score": 0.9623,
+        "roc_auc": 0.9946,
+        "confusion_matrix": [
+            [
+                57,
+                3
+            ],
+            [
+                1,
+                51
+            ]
+        ]
+    }
+}

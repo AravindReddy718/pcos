@@ -1,0 +1,8 @@
+PROJECT_RESULTS.md
+PROJECT_LIMITATIONS.md
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+.antigravityignore
+pcos_scan_model.pt
